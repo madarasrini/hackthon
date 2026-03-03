@@ -148,8 +148,8 @@ async function startServer() {
     try {
       const { text, targetLang, simplify } = req.body;
       
-      let apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-      if (!apiKey || apiKey.includes("PLACEHOLDER")) {
+      let apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
         return res.status(500).json({ error: "API Key not configured" });
       }
 
@@ -162,7 +162,7 @@ async function startServer() {
       prompt += `\n\nText: "${text}"`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash-exp",
+        model: "gemini-2.5-flash",
         contents: [
           { role: "user", parts: [{ text: prompt }] }
         ]
@@ -179,8 +179,10 @@ async function startServer() {
   app.post("/api/career/stage1/questions", async (req, res) => {
     try {
       const { selected_domains } = req.body;
-      let apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-      if (!apiKey) return res.status(500).json({ error: "API Key not configured" });
+      let apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.API_KEY;
+      if (!apiKey || apiKey.includes("PLACEHOLDER")) {
+        return res.status(500).json({ error: "API Key not configured" });
+      }
 
       const ai = new GoogleGenAI({ apiKey });
       const prompt = `
@@ -190,12 +192,12 @@ async function startServer() {
       `;
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash-exp",
+        model: "gemini-2.5-flash",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         config: { responseMimeType: "application/json" }
       });
 
-      res.json(JSON.parse(response.text));
+      res.json(JSON.parse(response.text || "[]"));
     } catch (e: any) {
       console.error("Stage 1 Error:", e);
       res.status(500).json({ error: "Failed to generate questions" });
@@ -228,22 +230,26 @@ async function startServer() {
   app.post("/api/career/stage2/questions", async (req, res) => {
     try {
       const { top_domains } = req.body;
-      let apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-      if (!apiKey) return res.status(500).json({ error: "API Key not configured" });
+      let apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.API_KEY;
+      if (!apiKey || apiKey.includes("PLACEHOLDER")) {
+        return res.status(500).json({ error: "API Key not configured" });
+      }
 
       const ai = new GoogleGenAI({ apiKey });
       const prompt = `
-        Generate 3 aptitude and logical reasoning questions relevant to these domains: ${top_domains.join(", ")}.
-        Return ONLY a JSON array of objects with keys: "id", "question", "options", "correct_option".
+        Generate 3 open-ended aptitude, logical reasoning, and situational judgment questions relevant to these domains: ${top_domains.join(", ")}.
+        The questions should require the user to explain their thought process.
+        Return ONLY a JSON array of objects with keys: "id" (string), "question" (string).
+        Do NOT include options or correct answers.
       `;
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash-exp",
+        model: "gemini-2.5-flash",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         config: { responseMimeType: "application/json" }
       });
 
-      res.json(JSON.parse(response.text));
+      res.json(JSON.parse(response.text || "[]"));
     } catch (e: any) {
       console.error("Stage 2 Error:", e);
       res.status(500).json({ error: "Failed to generate aptitude questions" });
@@ -253,15 +259,10 @@ async function startServer() {
   app.post("/api/career/stage2/evaluate", async (req, res) => {
     try {
       const { answers, stage1_results, user_id } = req.body;
-      let apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-      if (!apiKey) return res.status(500).json({ error: "API Key not configured" });
-
-      // Calculate aptitude score
-      let correct = 0;
-      answers.forEach((a: any) => {
-        if (a.selected_option === a.correct_option) correct++;
-      });
-      const aptitudeScore = (correct / answers.length) * 100;
+      let apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.API_KEY;
+      if (!apiKey || apiKey.includes("PLACEHOLDER")) {
+        return res.status(500).json({ error: "API Key not configured" });
+      }
 
       const ai = new GoogleGenAI({ apiKey });
       
@@ -269,29 +270,51 @@ async function startServer() {
       const allCourses = db.prepare("SELECT * FROM courses").all();
       
       const prompt = `
-        User Interest: ${JSON.stringify(stage1_results)}
-        Aptitude Score: ${aptitudeScore}
-        Available Courses: ${JSON.stringify(allCourses)}
+        You are an expert career counselor and technical evaluator.
         
-        Generate a career roadmap JSON with:
-        - primary_domain
-        - secondary_domain
-        - compatibility_score (0-100)
-        - recommended_courses (filter from Available Courses)
-        - roadmap (foundation, intermediate, advanced, placement_prep arrays)
-        - skill_gap_analysis (array of strings)
-        - estimated_time_to_job_ready
+        User Interest Assessment (Stage 1): ${JSON.stringify(stage1_results)}
         
-        Return ONLY JSON.
+        User Open-Ended Responses (Stage 2):
+        ${JSON.stringify(answers)}
+        
+        Available Courses in our system:
+        ${JSON.stringify(allCourses)}
+        
+        Evaluate the user's open-ended responses based on:
+        1. Logical reasoning and practical thinking.
+        2. Situational judgment and problem-solving approach.
+        3. Confidence and clarity of their career goals.
+        
+        Calculate an "aptitude_score" from 0 to 100 based on the quality of their answers.
+        
+        Then, generate a career roadmap JSON with the following exact structure:
+        {
+          "primary_domain": "string",
+          "secondary_domain": "string",
+          "compatibility_score": number (0-100),
+          "aptitude_score": number (0-100),
+          "evaluation_summary": "string explaining their strengths and goal clarity",
+          "recommended_courses": [ array of course objects filtered from Available Courses ],
+          "roadmap": {
+            "foundation": ["string", "string"],
+            "intermediate": ["string", "string"],
+            "advanced": ["string", "string"],
+            "placement_prep": ["string", "string"]
+          },
+          "skill_gap_analysis": ["string", "string"],
+          "estimated_time_to_job_ready": "string (e.g., '6-9 months')"
+        }
+        
+        Return ONLY valid JSON.
       `;
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash-exp",
+        model: "gemini-2.5-flash",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         config: { responseMimeType: "application/json" }
       });
 
-      const result = JSON.parse(response.text);
+      const result = JSON.parse(response.text || "{}");
 
       // Store in DB
       if (user_id) {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { 
@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
-import { useLanguage } from '@/context/LanguageContext';
+import { T } from '@/components/T';
 
 const data = [
   { name: 'Mon', xp: 400, focus: 240 },
@@ -42,7 +42,7 @@ const StatCard = ({ title, value, icon: Icon, color, trend }: any) => (
     <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500", color)} />
     <div className="flex justify-between items-start mb-4">
       <div>
-        <p className="text-sm font-medium text-slate-400">{title}</p>
+        <p className="text-sm font-medium text-slate-400"><T>{title}</T></p>
         <h3 className="text-3xl font-bold text-slate-100 mt-1 font-display">{value}</h3>
       </div>
       <div className={cn("p-3 rounded-xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform duration-300", color.replace('bg-', 'text-'))}>
@@ -54,7 +54,7 @@ const StatCard = ({ title, value, icon: Icon, color, trend }: any) => (
         <TrendingUp className="w-3 h-3" />
         {trend}
       </span>
-      <span className="text-slate-500">vs last week</span>
+      <span className="text-slate-500"><T>vs last week</T></span>
     </div>
   </motion.div>
 );
@@ -118,38 +118,6 @@ const BrainTwin = () => {
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { localize, language, simplify } = useLanguage();
-  const [texts, setTexts] = useState({
-    welcome: "Welcome back,",
-    performance: "Your cognitive performance is peaking today.",
-    analyze: "Analyze Skills",
-    start: "Start Learning",
-    totalXp: "Total XP",
-    focusTime: "Focus Time",
-    knowledgeNodes: "Knowledge Nodes",
-    accuracy: "Avg. Accuracy",
-    learningVelocity: "Learning Velocity",
-    brainTwin: "AI Brain Twin",
-    liveSync: "Live Sync",
-    memoryRetention: "Memory Retention",
-    cognitiveLoad: "Cognitive Load",
-    optimal: "Optimal",
-    high: "High"
-  });
-
-  useEffect(() => {
-    const translate = async () => {
-      const newTexts = { ...texts };
-      // Parallelize translation requests
-      const keys = Object.keys(texts) as (keyof typeof texts)[];
-      await Promise.all(keys.map(async (key) => {
-        newTexts[key] = await localize(texts[key]);
-      }));
-      setTexts(newTexts);
-    };
-    translate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [language, simplify]);
 
   return (
     <div className="space-y-8">
@@ -157,17 +125,17 @@ export default function Dashboard() {
       <div className="flex justify-between items-end">
         <div>
           <h2 className="text-3xl font-bold text-white mb-2 font-display">
-            {texts.welcome} <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{user?.name || 'User'}</span>
+            <T>Welcome back,</T> <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">{user?.name || 'User'}</span>
           </h2>
-          <p className="text-slate-400">{texts.performance}</p>
+          <p className="text-slate-400"><T>Your cognitive performance is peaking today.</T></p>
         </div>
         <div className="flex gap-3">
           <Link to="/assessment" className="px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 group">
             <Activity className="w-4 h-4 group-hover:animate-pulse" />
-            {texts.analyze}
+            <T>Analyze Skills</T>
           </Link>
           <Link to="/courses" className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium shadow-lg shadow-purple-500/25 transition-all hover:scale-105 flex items-center gap-2">
-            {texts.start}
+            <T>Start Learning</T>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -176,28 +144,28 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
-          title={texts.totalXp} 
+          title="Total XP" 
           value={user?.xp?.toLocaleString() || "12,450"} 
           icon={Zap} 
           color="bg-yellow-500" 
           trend="+12%" 
         />
         <StatCard 
-          title={texts.focusTime} 
+          title="Focus Time" 
           value="4h 12m" 
           icon={Target} 
           color="bg-cyan-500" 
           trend="+8%" 
         />
         <StatCard 
-          title={texts.knowledgeNodes} 
+          title="Knowledge Nodes" 
           value="84" 
           icon={Brain} 
           color="bg-purple-500" 
           trend="+3" 
         />
         <StatCard 
-          title={texts.accuracy} 
+          title="Avg. Accuracy" 
           value="94%" 
           icon={Activity} 
           color="bg-emerald-500" 
@@ -212,7 +180,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-cyan-400" />
-              {texts.learningVelocity}
+              <T>Learning Velocity</T>
             </h3>
             <select className="bg-black/20 border border-white/10 rounded-lg px-3 py-1 text-sm text-slate-400 outline-none focus:border-cyan-500/50 transition-colors">
               <option>This Week</option>
@@ -252,10 +220,10 @@ export default function Dashboard() {
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
               <Brain className="w-5 h-5 text-purple-400" />
-              {texts.brainTwin}
+              <T>AI Brain Twin</T>
             </h3>
             <span className="px-2 py-1 rounded-full bg-green-500/10 text-green-400 text-xs font-medium border border-green-500/20 animate-pulse">
-              {texts.liveSync}
+              <T>Live Sync</T>
             </span>
           </div>
           <div className="flex-1 flex items-center justify-center bg-black/20 rounded-xl border border-white/5 relative overflow-hidden group">
@@ -264,8 +232,8 @@ export default function Dashboard() {
           </div>
           <div className="mt-4 space-y-3">
             <div className="flex justify-between text-sm">
-              <span className="text-slate-400">{texts.memoryRetention}</span>
-              <span className="text-cyan-400">{texts.high} (92%)</span>
+              <span className="text-slate-400"><T>Memory Retention</T></span>
+              <span className="text-cyan-400"><T>High</T> (92%)</span>
             </div>
             <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
               <motion.div 
@@ -277,8 +245,8 @@ export default function Dashboard() {
             </div>
             
             <div className="flex justify-between text-sm">
-              <span className="text-slate-400">{texts.cognitiveLoad}</span>
-              <span className="text-purple-400">{texts.optimal}</span>
+              <span className="text-slate-400"><T>Cognitive Load</T></span>
+              <span className="text-purple-400"><T>Optimal</T></span>
             </div>
             <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
               <motion.div 

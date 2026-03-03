@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Fingerprint, ShieldCheck, User, Lock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import ParallaxStarsBackground from '@/components/ParallaxStarsBackground';
+import { T } from '@/components/T';
 
 export default function Login() {
   const { login } = useAuth();
@@ -49,7 +50,7 @@ export default function Login() {
       >
         <div className="flex flex-col items-center mb-8">
           <img src="/logo.png" alt="NeuroLearn AI" className="h-32 w-auto object-contain mb-6 drop-shadow-[0_0_15px_rgba(6,182,212,0.5)]" />
-          <p className="text-slate-400 text-sm tracking-widest uppercase">System Access Portal</p>
+          <p className="text-slate-400 text-sm tracking-widest uppercase"><T>System Access Portal</T></p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
@@ -64,7 +65,7 @@ export default function Login() {
                   : 'text-slate-500 hover:text-slate-300'
               }`}
             >
-              Student
+              <T>Student</T>
             </button>
             <button
               type="button"
@@ -75,7 +76,7 @@ export default function Login() {
                   : 'text-slate-500 hover:text-slate-300'
               }`}
             >
-              Teacher
+              <T>Teacher</T>
             </button>
           </div>
 
@@ -109,7 +110,7 @@ export default function Login() {
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
               <ShieldCheck className="w-5 h-5" />
-              Initialize Session
+              <T>Initialize Session</T>
             </span>
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
           </button>
@@ -131,8 +132,8 @@ export default function Login() {
                     <div className="absolute inset-0 border-t-4 border-cyan-400 rounded-full animate-spin" />
                     <Loader2 className="absolute inset-0 m-auto w-10 h-10 text-cyan-400 animate-pulse" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Invigilating Credentials</h3>
-                  <p className="text-slate-400 text-sm font-mono animate-pulse">Verifying identity...</p>
+                  <h3 className="text-xl font-bold text-white mb-2"><T>Invigilating Credentials</T></h3>
+                  <p className="text-slate-400 text-sm font-mono animate-pulse"><T>Verifying identity...</T></p>
                 </>
               )}
 
@@ -146,10 +147,10 @@ export default function Login() {
                     <CheckCircle className="w-12 h-12 text-green-400" />
                   </motion.div>
                   <h3 className="text-xl font-bold text-white mb-2">
-                    {role === 'admin' ? 'Verified Admin' : 'Verified Student'}
+                    <T>{role === 'admin' ? 'Verified Admin' : 'Verified Student'}</T>
                   </h3>
                   <p className="text-green-400 text-sm font-mono">
-                    Redirecting to {role === 'admin' ? 'Teacher Dashboard' : 'Student Dashboard'}...
+                    <T>Redirecting to</T> <T>{role === 'admin' ? 'Teacher Dashboard' : 'Student Dashboard'}</T>...
                   </p>
                 </>
               )}
@@ -163,9 +164,9 @@ export default function Login() {
                   >
                     <XCircle className="w-12 h-12 text-red-400" />
                   </motion.div>
-                  <h3 className="text-xl font-bold text-white mb-2">Access Denied</h3>
+                  <h3 className="text-xl font-bold text-white mb-2"><T>Access Denied</T></h3>
                   <p className="text-red-400 text-sm font-bold px-4 py-2 bg-red-500/10 rounded-lg border border-red-500/20">
-                    {errorMessage}
+                    <T>{errorMessage}</T>
                   </p>
                 </>
               )}

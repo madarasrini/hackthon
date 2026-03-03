@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BrainCircuit, CheckCircle, ArrowRight, Sparkles, Target, BookOpen, Map, Download } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { T } from '@/components/T';
 
 const DOMAINS = [
   "Artificial Intelligence", "Data Science", "Cybersecurity", "Web Development",
@@ -37,10 +38,16 @@ export default function CareerGuidance() {
         body: JSON.stringify({ selected_domains: selectedDomains })
       });
       const data = await res.json();
-      setStage1Questions(data);
-      setStage('stage1-questions');
+      if (Array.isArray(data)) {
+        setStage1Questions(data);
+        setStage('stage1-questions');
+      } else {
+        console.error("Invalid response format:", data);
+        alert("Failed to generate questions. Please try again.");
+      }
     } catch (e) {
       console.error(e);
+      alert("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -55,10 +62,16 @@ export default function CareerGuidance() {
         body: JSON.stringify({ answers: stage1Answers })
       });
       const data = await res.json();
-      setStage1Result(data);
-      setStage('stage1-result');
+      if (data.top_domains) {
+        setStage1Result(data);
+        setStage('stage1-result');
+      } else {
+        console.error("Invalid response format:", data);
+        alert("Failed to evaluate answers. Please try again.");
+      }
     } catch (e) {
       console.error(e);
+      alert("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -73,10 +86,16 @@ export default function CareerGuidance() {
         body: JSON.stringify({ top_domains: stage1Result.top_domains })
       });
       const data = await res.json();
-      setStage2Questions(data);
-      setStage('stage2-questions');
+      if (Array.isArray(data)) {
+        setStage2Questions(data);
+        setStage('stage2-questions');
+      } else {
+        console.error("Invalid response format:", data);
+        alert("Failed to generate questions. Please try again.");
+      }
     } catch (e) {
       console.error(e);
+      alert("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -95,10 +114,16 @@ export default function CareerGuidance() {
         })
       });
       const data = await res.json();
-      setFinalResult(data);
-      setStage('final-result');
+      if (data.primary_domain) {
+        setFinalResult(data);
+        setStage('final-result');
+      } else {
+        console.error("Invalid response format:", data);
+        alert("Failed to generate roadmap. Please try again.");
+      }
     } catch (e) {
       console.error(e);
+      alert("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -125,17 +150,16 @@ export default function CareerGuidance() {
                 <BrainCircuit className="w-12 h-12 text-white" />
               </div>
               <h1 className="text-5xl font-bold font-display bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-                AI Career Intelligence
+                <T>AI Career Intelligence</T>
               </h1>
               <p className="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                Discover your perfect career path through our advanced AI-driven assessment. 
-                We analyze your interests, aptitude, and cognitive patterns to build a personalized roadmap.
+                <T>Discover your perfect career path through our advanced AI-driven assessment. We analyze your interests, aptitude, and cognitive patterns to build a personalized roadmap.</T>
               </p>
               <button 
                 onClick={() => setStage('domain-select')}
                 className="px-8 py-4 bg-white text-black rounded-full font-bold text-lg hover:scale-105 transition-transform flex items-center gap-2 mx-auto"
               >
-                Start Discovery <ArrowRight className="w-5 h-5" />
+                <T>Start Discovery</T> <ArrowRight className="w-5 h-5" />
               </button>
             </motion.div>
           )}
@@ -147,7 +171,7 @@ export default function CareerGuidance() {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-8"
             >
-              <h2 className="text-3xl font-bold text-center">Select 3 Domains of Interest</h2>
+              <h2 className="text-3xl font-bold text-center"><T>Select 3 Domains of Interest</T></h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {DOMAINS.map(domain => (
                   <button
@@ -160,7 +184,7 @@ export default function CareerGuidance() {
                     }`}
                   >
                     <span className={`text-lg font-medium ${selectedDomains.includes(domain) ? 'text-cyan-400' : 'text-slate-300'}`}>
-                      {domain}
+                      <T>{domain}</T>
                     </span>
                   </button>
                 ))}
@@ -171,7 +195,7 @@ export default function CareerGuidance() {
                   disabled={selectedDomains.length !== 3 || loading}
                   className="px-8 py-3 bg-cyan-600 rounded-xl font-bold disabled:opacity-50 flex items-center gap-2"
                 >
-                  {loading ? 'Generating...' : 'Next Step'} <ArrowRight className="w-5 h-5" />
+                  {loading ? <T>Generating...</T> : <T>Next Step</T>} <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
             </motion.div>
@@ -184,47 +208,63 @@ export default function CareerGuidance() {
               className="max-w-3xl mx-auto space-y-8"
             >
               <h2 className="text-2xl font-bold text-center text-slate-200">
-                {stage === 'stage1-questions' ? 'Joyful Discovery Assessment' : 'Aptitude & Readiness Check'}
+                {stage === 'stage1-questions' ? <T>Joyful Discovery Assessment</T> : <T>Aptitude & Readiness Check</T>}
               </h2>
               
               {(stage === 'stage1-questions' ? stage1Questions : stage2Questions).map((q, idx) => (
                 <div key={idx} className="bg-white/5 border border-white/10 p-6 rounded-2xl space-y-4">
-                  <h3 className="text-lg font-medium text-white">{q.question}</h3>
+                  <h3 className="text-lg font-medium text-white"><T>{q.question}</T></h3>
                   <div className="space-y-2">
-                    {q.options.map((opt: string, oIdx: number) => (
-                      <button
-                        key={oIdx}
-                        onClick={() => {
-                          const setAnswers = stage === 'stage1-questions' ? setStage1Answers : setStage2Answers;
-                          const currentAnswers = stage === 'stage1-questions' ? stage1Answers : stage2Answers;
-                          const newAnswers = [...currentAnswers];
+                    {stage === 'stage1-questions' ? (
+                      q.options?.map((opt: string, oIdx: number) => (
+                        <button
+                          key={oIdx}
+                          onClick={() => {
+                            const newAnswers = [...stage1Answers];
+                            const existingIdx = newAnswers.findIndex(a => a.question_id === q.id);
+                            
+                            const answerObj = { 
+                              question_id: q.id, 
+                              selected_option: opt,
+                              domain_mapping: q.domain_mapping
+                            };
+
+                            if (existingIdx >= 0) newAnswers[existingIdx] = answerObj;
+                            else newAnswers.push(answerObj);
+                            
+                            setStage1Answers(newAnswers);
+                          }}
+                          className={`w-full text-left p-4 rounded-xl border transition-all ${
+                            stage1Answers.find(a => a.question_id === q.id)?.selected_option === opt
+                              ? 'border-cyan-500 bg-cyan-500/10'
+                              : 'border-white/5 bg-black/20 hover:bg-white/5'
+                          }`}
+                        >
+                          <T>{opt}</T>
+                        </button>
+                      ))
+                    ) : (
+                      <textarea
+                        className="w-full bg-black/20 border border-white/10 rounded-xl p-4 text-slate-200 outline-none focus:border-purple-500/50 focus:bg-purple-500/5 transition-all min-h-[120px]"
+                        placeholder="Explain your thought process..."
+                        value={stage2Answers.find(a => a.question_id === q.id)?.response || ''}
+                        onChange={(e) => {
+                          const newAnswers = [...stage2Answers];
                           const existingIdx = newAnswers.findIndex(a => a.question_id === q.id);
                           
                           const answerObj = { 
                             question_id: q.id, 
-                            selected_option: opt,
-                            domain_mapping: q.domain_mapping // Only for stage 1
+                            question_text: q.question,
+                            response: e.target.value
                           };
-                          
-                          if (stage === 'stage2-questions') {
-                             // @ts-ignore
-                             answerObj.correct_option = q.correct_option;
-                          }
 
                           if (existingIdx >= 0) newAnswers[existingIdx] = answerObj;
                           else newAnswers.push(answerObj);
                           
-                          setAnswers(newAnswers);
+                          setStage2Answers(newAnswers);
                         }}
-                        className={`w-full text-left p-4 rounded-xl border transition-all ${
-                          (stage === 'stage1-questions' ? stage1Answers : stage2Answers).find(a => a.question_id === q.id)?.selected_option === opt
-                            ? 'border-cyan-500 bg-cyan-500/10'
-                            : 'border-white/5 bg-black/20 hover:bg-white/5'
-                        }`}
-                      >
-                        {opt}
-                      </button>
-                    ))}
+                      />
+                    )}
                   </div>
                 </div>
               ))}
@@ -233,9 +273,9 @@ export default function CareerGuidance() {
                 <button 
                   onClick={stage === 'stage1-questions' ? submitStage1 : submitStage2}
                   disabled={loading}
-                  className="px-8 py-3 bg-gradient-to-r from-cyan-600 to-purple-600 rounded-xl font-bold shadow-lg hover:shadow-cyan-500/25 transition-all"
+                  className="px-8 py-3 bg-gradient-to-r from-cyan-600 to-purple-600 rounded-xl font-bold shadow-lg hover:shadow-cyan-500/25 transition-all disabled:opacity-50"
                 >
-                  {loading ? 'Analyzing...' : 'Submit Assessment'}
+                  {loading ? <T>Analyzing...</T> : <T>Submit Assessment</T>}
                 </button>
               </div>
             </motion.div>
@@ -250,14 +290,14 @@ export default function CareerGuidance() {
               <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Sparkles className="w-10 h-10 text-green-400" />
               </div>
-              <h2 className="text-3xl font-bold">Great Job! We've found your spark.</h2>
-              <p className="text-slate-400 max-w-xl mx-auto">{stage1Result.message}</p>
+              <h2 className="text-3xl font-bold"><T>Great Job! We've found your spark.</T></h2>
+              <p className="text-slate-400 max-w-xl mx-auto"><T>{stage1Result.message}</T></p>
               
               <div className="grid grid-cols-2 gap-6 max-w-2xl mx-auto">
                 {stage1Result.top_domains.map((domain: string) => (
                   <div key={domain} className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 border border-white/10 rounded-2xl">
-                    <h3 className="text-xl font-bold text-cyan-400 mb-2">{domain}</h3>
-                    <div className="text-sm text-slate-500">High Compatibility</div>
+                    <h3 className="text-xl font-bold text-cyan-400 mb-2"><T>{domain}</T></h3>
+                    <div className="text-sm text-slate-500"><T>High Compatibility</T></div>
                   </div>
                 ))}
               </div>
@@ -267,7 +307,7 @@ export default function CareerGuidance() {
                 disabled={loading}
                 className="px-8 py-3 bg-white text-black rounded-full font-bold mt-8 hover:scale-105 transition-transform"
               >
-                {loading ? 'Preparing...' : 'Proceed to Aptitude Check'}
+                {loading ? <T>Preparing...</T> : <T>Proceed to Aptitude Check</T>}
               </button>
             </motion.div>
           )}
@@ -280,17 +320,17 @@ export default function CareerGuidance() {
             >
               {/* Header */}
               <div className="text-center space-y-4">
-                <h2 className="text-4xl font-bold font-display">Your Career Blueprint</h2>
-                <p className="text-slate-400">Based on your unique profile, here is your path to success.</p>
+                <h2 className="text-4xl font-bold font-display"><T>Your Career Blueprint</T></h2>
+                <p className="text-slate-400"><T>Based on your unique profile, here is your path to success.</T></p>
               </div>
 
               {/* Top Section: Domains & Score */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="col-span-2 bg-slate-900/50 border border-white/10 p-8 rounded-3xl backdrop-blur-xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-[80px] -mr-20 -mt-20" />
-                  <h3 className="text-sm font-medium text-slate-400 uppercase tracking-widest mb-4">Primary Domain</h3>
-                  <div className="text-4xl font-bold text-white mb-2">{finalResult.primary_domain}</div>
-                  <div className="text-lg text-cyan-400 mb-6">Secondary: {finalResult.secondary_domain}</div>
+                  <h3 className="text-sm font-medium text-slate-400 uppercase tracking-widest mb-4"><T>Primary Domain</T></h3>
+                  <div className="text-4xl font-bold text-white mb-2"><T>{finalResult.primary_domain}</T></div>
+                  <div className="text-lg text-cyan-400 mb-6"><T>Secondary:</T> <T>{finalResult.secondary_domain}</T></div>
                   
                   <div className="flex items-center gap-4">
                     <div className="flex-1 h-4 bg-slate-800 rounded-full overflow-hidden">
@@ -301,32 +341,32 @@ export default function CareerGuidance() {
                         className="h-full bg-gradient-to-r from-cyan-500 to-purple-500"
                       />
                     </div>
-                    <span className="text-2xl font-bold">{finalResult.compatibility_score}% Match</span>
+                    <span className="text-2xl font-bold">{finalResult.compatibility_score}% <T>Match</T></span>
                   </div>
                 </div>
 
                 <div className="bg-slate-900/50 border border-white/10 p-8 rounded-3xl backdrop-blur-xl flex flex-col justify-center items-center text-center">
                   <Target className="w-12 h-12 text-purple-400 mb-4" />
-                  <div className="text-3xl font-bold text-white mb-1">{finalResult.estimated_time_to_job_ready}</div>
-                  <div className="text-sm text-slate-400">Estimated Time to Job Ready</div>
+                  <div className="text-3xl font-bold text-white mb-1"><T>{finalResult.estimated_time_to_job_ready}</T></div>
+                  <div className="text-sm text-slate-400"><T>Estimated Time to Job Ready</T></div>
                 </div>
               </div>
 
               {/* Roadmap */}
               <div className="space-y-6">
                 <h3 className="text-2xl font-bold flex items-center gap-3">
-                  <Map className="w-6 h-6 text-cyan-400" /> Strategic Roadmap
+                  <Map className="w-6 h-6 text-cyan-400" /> <T>Strategic Roadmap</T>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   {['foundation', 'intermediate', 'advanced', 'placement_prep'].map((phase, idx) => (
                     <div key={phase} className="bg-white/5 border border-white/10 p-6 rounded-2xl relative group hover:border-cyan-500/30 transition-colors">
                       <div className="absolute top-4 right-4 text-6xl font-bold text-white/5 group-hover:text-white/10 transition-colors">0{idx + 1}</div>
-                      <h4 className="text-lg font-bold capitalize mb-4 text-cyan-200">{phase.replace('_', ' ')}</h4>
+                      <h4 className="text-lg font-bold capitalize mb-4 text-cyan-200"><T>{phase.replace('_', ' ')}</T></h4>
                       <ul className="space-y-2">
                         {finalResult.roadmap[phase].map((item: string, i: number) => (
                           <li key={i} className="text-sm text-slate-400 flex items-start gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 mt-1.5 flex-shrink-0" />
-                            {item}
+                            <T>{item}</T>
                           </li>
                         ))}
                       </ul>
@@ -338,7 +378,7 @@ export default function CareerGuidance() {
               {/* Recommended Courses */}
               <div className="space-y-6">
                 <h3 className="text-2xl font-bold flex items-center gap-3">
-                  <BookOpen className="w-6 h-6 text-purple-400" /> Recommended Courses
+                  <BookOpen className="w-6 h-6 text-purple-400" /> <T>Recommended Courses</T>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {finalResult.recommended_courses.map((course: any, idx: number) => (
@@ -352,11 +392,11 @@ export default function CareerGuidance() {
                         />
                       </div>
                       <div>
-                        <h4 className="text-xl font-bold text-white mb-2">{course.title}</h4>
-                        <p className="text-sm text-slate-400 line-clamp-2 mb-4">{course.description}</p>
+                        <h4 className="text-xl font-bold text-white mb-2"><T>{course.title}</T></h4>
+                        <p className="text-sm text-slate-400 line-clamp-2 mb-4"><T>{course.description}</T></p>
                         <div className="flex gap-2">
                           <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs border border-purple-500/20">
-                            {course.difficulty}
+                            <T>{course.difficulty}</T>
                           </span>
                         </div>
                       </div>
@@ -368,7 +408,7 @@ export default function CareerGuidance() {
               {/* Action Bar */}
               <div className="fixed bottom-8 right-8 flex gap-4">
                 <button className="px-6 py-3 bg-slate-800 border border-white/10 rounded-full font-bold hover:bg-slate-700 transition-colors flex items-center gap-2">
-                  <Download className="w-4 h-4" /> Download PDF
+                  <Download className="w-4 h-4" /> <T>Download PDF</T>
                 </button>
               </div>
             </motion.div>

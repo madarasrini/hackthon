@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import ParallaxStarsBackground from './ParallaxStarsBackground';
 import { useAuth } from '@/context/AuthContext';
 import LanguageSelector from './LanguageSelector';
+import { T } from '@/components/T';
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
@@ -82,7 +83,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   />
                 )}
                 <Icon className={cn("w-5 h-5 relative z-10 transition-transform duration-300 group-hover:scale-110", isActive && "animate-pulse")} />
-                <span className="font-medium relative z-10 tracking-wide">{item.label}</span>
+                <span className="font-medium relative z-10 tracking-wide"><T>{item.label}</T></span>
                 
                 {/* Hover Glow Effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -97,7 +98,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 border border-transparent transition-all duration-300 group"
           >
             <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Sign Out</span>
+            <span className="font-medium"><T>Sign Out</T></span>
           </button>
         </div>
       </motion.aside>
@@ -107,14 +108,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {/* Header */}
         <header className="h-16 flex items-center justify-between px-8 border-b border-white/10 bg-slate-900/30 backdrop-blur-md z-20">
           <h1 className="text-lg font-medium text-slate-200 font-display tracking-wider">
-            {sidebarItems.find(i => i.path === location.pathname)?.label || 'Dashboard'}
+            <T>{sidebarItems.find(i => i.path === location.pathname)?.label || 'Dashboard'}</T>
           </h1>
           
           <div className="flex items-center gap-4">
             <LanguageSelector />
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-              <span className="text-xs font-medium text-slate-300">System Online</span>
+              <span className="text-xs font-medium text-slate-300"><T>System Online</T></span>
             </div>
             <button className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center hover:bg-slate-700 hover:border-cyan-500/30 transition-all duration-300 group">
               <Settings className="w-4 h-4 text-slate-400 group-hover:rotate-90 transition-transform duration-500" />
@@ -122,7 +123,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-3 pl-4 border-l border-white/10">
               <div className="text-right hidden md:block">
                 <div className="text-sm font-medium text-white">{user?.name}</div>
-                <div className="text-xs text-slate-400 capitalize">{user?.role} • Lvl {user?.level}</div>
+                <div className="text-xs text-slate-400 capitalize">{user?.role} • <T>Lvl</T> {user?.level}</div>
               </div>
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 border border-white/20 shadow-lg shadow-purple-500/20" />
             </div>
